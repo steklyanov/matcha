@@ -1,0 +1,10 @@
+[server]
+host = "localhost"
+port = 5000
+
+[database]
+host = "localhost"
+port = 5433
+dbname = "matcha"
+password = "password"
+username = "postgres"
