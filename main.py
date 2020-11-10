@@ -3,30 +3,19 @@ import logging
 import argparse
 
 
+from aiomisc.log import basic_config
+
 from aiohttp import web
 from aiohttp.web import Application
 import asyncpg
 from setproctitle import setproctitle
 
+from aiomisc import entrypoint
+
 from utils import load_config, set_logging
+from api import APIService
 
-
-async def init(args: argparse.Namespace):
-    setproctitle("matcha_backend")
-    config = load_config(args.config)
-    set_logging(config)
-
-    app = web.Application()
-
-    app["pool"] = await asyncpg.create_pool(user=config['database']['username'],
-                                            password=config['database']['password'],
-                                            database=config['database']['dbname'],
-                                            host=config['database']['host'],
-                                            port=config['database']['port'])
-
-    app["config"] = config
-
-    return app, config
+log = logging.getLogger()
 
 
 async def finalize(app: Application):
@@ -35,13 +24,20 @@ async def finalize(app: Application):
 
 def main():
     args = parser.parse_args()
+    config = load_config(args.config)
 
-    loop = asyncio.get_event_loop()
-    app, config = loop.run_until_complete(init(args))
+    setproctitle(config["settings"]["proc_title"])
 
-    app.on_cleanup.append(finalize)
+    basic_config(
+        level=config["settings"]["log_level"],
+        log_format='color',
+        flush_interval=2
+    )
 
-    web.run_app(app, host=config["server"]["host"], port=config["server"]["port"], access_log=logging.Logger)
+    service = APIService(address=config["server"]["host"], port=config["server"]["port"], config=config)
+
+    with entrypoint(service) as loop:
+        loop.run_forever()
 
 
 if __name__ == '__main__':

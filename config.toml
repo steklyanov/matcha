@@ -1,6 +1,6 @@
 [server]
 host = "localhost"
-port = 5000
+port = 5600
 
 [database]
 host = "localhost"
@@ -8,3 +8,13 @@ port = 5433
 dbname = "matcha"
 password = "password"
 username = "postgres"
+
+[settings]
+log_level = 20
+proc_title = "matcha_backend"
+secret = "adf630a0-8df5-413e-874c-f65ddf7a2212"
+
+[auth]
+expr_delta = 200000
+algo = "HS256"
+secret = "adf630a0-8df5-413e-874c-f65ddf7a2212"
